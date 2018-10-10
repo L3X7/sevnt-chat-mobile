@@ -33,23 +33,7 @@ class ChatFragment : Fragment() {
 
     private fun loadInformation() {
         chatModel = ArrayList()
-        chatModel.add(
-                ChatModel("http://www.menucool.com/slider/prod/image-slider-4.jpg",
-                        "Prueba",
-                        "Esto es una prueba",
-                        "23:02")
 
-        )
-        chatModel.add(
-                ChatModel("http://www.menucool.com/slider/prod/image-slider-4.jpg",
-                        "Prueba",
-                        "Esto es una prueba",
-                        "23:02"))
-        chatModel.add(
-                ChatModel("http://www.menucool.com/slider/prod/image-slider-4.jpg",
-                        "Prueba",
-                        "Esto es una prueba",
-                        "23:02"))
 
 
     }

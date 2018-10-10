@@ -6,6 +6,7 @@ import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import com.sevnt.alex.sevntchat.adapters.TabViewPageAdapter
 import com.sevnt.alex.sevntchat.fragments.ChatFragment
+import com.sevnt.alex.sevntchat.fragments.ContactFragment
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupViewPager(viewPager: ViewPager) {
         val adapter = TabViewPageAdapter(supportFragmentManager)
         adapter.addFragment(ChatFragment(), "Chats")
+        adapter.addFragment(ContactFragment(), "Contacts")
         viewPager.adapter = adapter
 
     }

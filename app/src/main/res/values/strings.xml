@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">SevntChat</string>
+
+    <!--URL's-->
+    <!--Contacts-->
+    <string name="get_contact_by_iuser">https://sevnt-chat-api.herokuapp.com/api/contact/get-contact-by-iuser?id=</string>
+
+    <!--Messages from request-->
+    <string name="register_not_found">No se encontraron registros</string>
+    <string name="error_request">Hubo error al realizar la busqueda</string>
 </resources>
