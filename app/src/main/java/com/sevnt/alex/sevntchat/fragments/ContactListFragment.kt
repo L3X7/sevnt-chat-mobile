@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,32 +11,31 @@ import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.sevnt.alex.sevntchat.R
-import com.sevnt.alex.sevntchat.adapters.ContactAdapter
-import com.sevnt.alex.sevntchat.models.ContactModel
+import com.sevnt.alex.sevntchat.adapters.ContactListAdapter
+import com.sevnt.alex.sevntchat.models.ContactListModel
 import org.json.JSONArray
-import org.json.JSONObject
 import java.lang.Exception
 
-class ContactFragment : Fragment() {
+class ContactListFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var contactModel: ArrayList<ContactModel>
-    private lateinit var contactAdapter: ContactAdapter
+    private lateinit var contactListModel: ArrayList<ContactListModel>
+    private lateinit var contactListAdapter: ContactListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        contactModel = ArrayList()
+        contactListModel = ArrayList()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_contact, container, false)
+        val v = inflater.inflate(R.layout.fragment_contact_list, container, false)
         recyclerView = v.findViewById(R.id.rViewContact)
         recyclerView.layoutManager = LinearLayoutManager(activity)
+        recyclerView.setHasFixedSize(true)
         loadContacts(v)
-        contactAdapter = ContactAdapter(contactModel)
-        recyclerView.adapter = contactAdapter
+        contactListAdapter = ContactListAdapter(contactListModel, v.context)
+        recyclerView.adapter = contactListAdapter
         return v
     }
 
@@ -45,7 +43,7 @@ class ContactFragment : Fragment() {
         val idUser = "5bbcf21fc2e5dd0015ff7e1d"
         val url = resources.getString(R.string.get_contact_by_iuser) + idUser
         val queue = Volley.newRequestQueue(itemView.context)
-        contactModel = ArrayList()
+        contactListModel = ArrayList()
         try {
             val jsonRequest = JsonArrayRequest(Request.Method.GET, url, null,
                     Response.Listener<JSONArray> { response ->
@@ -54,7 +52,7 @@ class ContactFragment : Fragment() {
                                 val jsonObject = response.getJSONObject(i).getJSONObject("contact_user")
                                 val nameContact = jsonObject.getString("first_name") + " " + jsonObject.getString("surname")
                                 val imageContact = jsonObject.getString("user_image")
-                                contactModel.add(ContactModel(imageContact, nameContact))
+                                contactListModel.add(ContactListModel(imageContact, nameContact))
                             }
                             recyclerView.adapter?.notifyDataSetChanged()
                         } else {

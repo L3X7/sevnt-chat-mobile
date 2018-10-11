@@ -8,13 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.sevnt.alex.sevntchat.R
-import com.sevnt.alex.sevntchat.adapters.ChatAdapter
-import com.sevnt.alex.sevntchat.models.ChatModel
+import com.sevnt.alex.sevntchat.adapters.ChatListAdapter
+import com.sevnt.alex.sevntchat.models.ChatListModel
 
-class ChatFragment : Fragment() {
+class ChatListFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var chatModel: ArrayList<ChatModel>
-    private lateinit var chatAdapter: ChatAdapter
+    private lateinit var chatListModel: ArrayList<ChatListModel>
+    private lateinit var chatListAdapter: ChatListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,17 +22,17 @@ class ChatFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_chat, container, false)
+        val v = inflater.inflate(R.layout.fragment_chat_list, container, false)
         recyclerView = v.findViewById(R.id.rViewChat)
-        chatAdapter = ChatAdapter(chatModel)
+        chatListAdapter = ChatListAdapter(chatListModel)
         recyclerView.layoutManager = LinearLayoutManager(activity)
-        recyclerView.adapter = chatAdapter
-        chatAdapter.notifyDataSetChanged()
+        recyclerView.adapter = chatListAdapter
+        chatListAdapter.notifyDataSetChanged()
         return v
     }
 
     private fun loadInformation() {
-        chatModel = ArrayList()
+        chatListModel = ArrayList()
 
 
 
