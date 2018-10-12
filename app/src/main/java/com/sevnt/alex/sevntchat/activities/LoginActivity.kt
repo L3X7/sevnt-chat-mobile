@@ -14,6 +14,8 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.sevnt.alex.sevntchat.MainActivity
 import com.sevnt.alex.sevntchat.R
+import com.sevnt.alex.sevntchat.helpers.UserDataBaseHelper
+import com.sevnt.alex.sevntchat.models.UserDBModel
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -22,6 +24,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: Button
     private lateinit var txtLoginUser: EditText
     private lateinit var txtLoginPassword: EditText
+    private var userDBModel: UserDBModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +33,15 @@ class LoginActivity : AppCompatActivity() {
         btnLogin = findViewById(R.id.btnLogin)
         txtLoginUser = findViewById(R.id.txtLoginUser)
         txtLoginPassword = findViewById(R.id.txtLoginPassword)
+
+
+        val dbHandler = UserDataBaseHelper(this)
+        userDBModel = dbHandler.findFirstUser()
+        if (userDBModel != null) {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            this.finish()
+        }
 
 
         btnLogin.setOnClickListener {
@@ -62,8 +74,19 @@ class LoginActivity : AppCompatActivity() {
                                 if (responseJson ==  statusRequest) {
                                     if (userObject.length() != 0) {
                                         val idUser = userObject.getJSONObject(0).getString("_id")
+                                        val userName = userObject.getJSONObject(0).getString("username")
+                                        val firstName = userObject.getJSONObject(0).getString("first_name")
+                                        val surName = userObject.getJSONObject(0).getString("surname")
+
+                                        //if exist register get, else create user
+                                        val dbHandler = UserDataBaseHelper(context)
+                                        val userFindModel = dbHandler.findUserById(idUser)
+                                        if(userFindModel == null){
+                                            val userDBModel = UserDBModel(idUser,userName,firstName,surName)
+                                            dbHandler.addUser(userDBModel)
+                                        }
+
                                         val intent = Intent(context, MainActivity::class.java)
-                                        intent.putExtra("idUser", idUser)
                                         startActivity(intent)
                                     } else {
                                         Toast.makeText(context, R.string.error_invalid_credentials_login, Toast.LENGTH_SHORT).show()

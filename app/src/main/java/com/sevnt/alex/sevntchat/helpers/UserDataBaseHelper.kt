@@ -20,39 +20,85 @@ class UserDataBaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
     }
 
     @Throws(SQLiteConstraintException::class)
-    fun insertUser(user: UserDBModel): Boolean {
-        val db = writableDatabase
+    fun addUser(user: UserDBModel): Boolean {
+        val db = this.writableDatabase
         val values = ContentValues()
         values.put(UserDatabaseContract.UserEntry.ID_USER, user.idUser)
         values.put(UserDatabaseContract.UserEntry.USER_NAME, user.userName)
         values.put(UserDatabaseContract.UserEntry.FIRST_NAME, user.firstName)
         values.put(UserDatabaseContract.UserEntry.SURNAME, user.surname)
-        val newRowId = db.insert(UserDatabaseContract.UserEntry.TABLE_NAME, null, values)
+        db.insert(UserDatabaseContract.UserEntry.TABLE_NAME, null, values)
+        db.close()
         return true
     }
 
     @Throws(SQLiteConstraintException::class)
     fun deleteUSer(userId: String): Boolean {
-        val db = writableDatabase
-        val queryDelete = UserDatabaseContract.UserEntry.ID_USER + "=" + userId
+        val db = this.writableDatabase
+        val queryDelete = UserDatabaseContract.UserEntry.ID_USER + " = " + "\"" + userId +  "\""
         db.delete(UserDatabaseContract.UserEntry.TABLE_NAME, queryDelete, null)
+        db.close()
         return true
     }
 
-    companion object {
-        val DATABASE_NAME = "SEVNTCHAT.db"
-        val DATABASE_VERSION = 1
+    @Throws(SQLiteConstraintException::class)
+    fun findFirstUser(): UserDBModel? {
+        val db = this.writableDatabase
+        var userDBModel: UserDBModel? = null
+        val cursor = db.rawQuery(SQL_FIND_FIRST_USER_ENTRIES , null)
+        if (cursor.moveToFirst()) {
+            cursor.moveToFirst()
+            val idUser = cursor.getString(1)
+            val userName = cursor.getString(2)
+            val firstName = cursor.getString(3)
+            val surName = cursor.getString(4)
+            userDBModel = UserDBModel(idUser, userName, firstName, surName)
+            cursor.close()
+        }
+        db.close()
+        return userDBModel
 
+    }
+
+    @Throws(SQLiteConstraintException::class)
+    fun findUserById(userId: String): UserDBModel? {
+        val db = this.writableDatabase
+        var userDBModel: UserDBModel? = null
+        val cursor = db.rawQuery(SQL_FIND_USER_ENTRIES + "\"" + userId +  "\"", null)
+        if (cursor.moveToFirst()) {
+            cursor.moveToFirst()
+            val idUser = cursor.getString(1)
+            val userName = cursor.getString(2)
+            val firstName = cursor.getString(3)
+            val surName = cursor.getString(4)
+            userDBModel = UserDBModel(idUser, userName, firstName, surName)
+            cursor.close()
+        }
+        db.close()
+        return userDBModel
+
+    }
+
+    companion object {
+        const val DATABASE_NAME = "SEVNTCHAT.db"
+        const val DATABASE_VERSION = 1
+
+        private val SQL_FIND_USER_ENTRIES = "SELECT * FROM " + UserDatabaseContract.UserEntry.TABLE_NAME +
+                " WHERE " + UserDatabaseContract.UserEntry.ID_USER + " = "
+
+        private val SQL_FIND_FIRST_USER_ENTRIES = "SELECT * FROM " + UserDatabaseContract.UserEntry.TABLE_NAME +
+                " LIMIT 1"
 
         //        Users
         private val SQL_CREATE_USER_ENTRIES =
-                "CREATE TABLE" + UserDatabaseContract.UserEntry.TABLE_NAME + "( " +
-                        UserDatabaseContract.UserEntry.ID_USER + " TEXT PRIMARY KEY," +
+                "CREATE TABLE " + UserDatabaseContract.UserEntry.TABLE_NAME + "( " +
+                        UserDatabaseContract.UserEntry.COLUMN_ID + " INTEGER PRIMARY KEY," +
+                        UserDatabaseContract.UserEntry.ID_USER + " TEXT," +
                         UserDatabaseContract.UserEntry.USER_NAME + " TEXT," +
                         UserDatabaseContract.UserEntry.FIRST_NAME + " TEXT," +
                         UserDatabaseContract.UserEntry.SURNAME + " TEXT)"
 
-        private val SQL_DELETE_USER_ENTRIES = "DROP TABLE IF EXIST" + UserDatabaseContract.UserEntry.TABLE_NAME
+        private val SQL_DELETE_USER_ENTRIES = "DROP TABLE IF EXIST " + UserDatabaseContract.UserEntry.TABLE_NAME
 
     }
 }

@@ -18,7 +18,9 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.sevnt.alex.sevntchat.R
 import com.sevnt.alex.sevntchat.adapters.ChatAdapter
+import com.sevnt.alex.sevntchat.helpers.UserDataBaseHelper
 import com.sevnt.alex.sevntchat.models.ChatModel
+import com.sevnt.alex.sevntchat.models.UserDBModel
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -27,15 +29,24 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var chatModel: ArrayList<ChatModel>
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var btnSendMessage: Button
-    private lateinit var userOne: String
+    private var userDBModel: UserDBModel? = null
     private lateinit var userTwo: String
     private lateinit var messageRoom: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+
+        val dbHandler = UserDataBaseHelper(this)
+        userDBModel = dbHandler.findFirstUser()
+        if (userDBModel == null) {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            this.finish()
+        }
+
+
         val intent = intent
-        userOne = "5bbcf21fc2e5dd0015ff7e1d"
         userTwo = intent.getStringExtra("idContact")
         val toolbar = findViewById<Toolbar>(R.id.chatToolbar)
         setSupportActionBar(toolbar)
@@ -54,7 +65,6 @@ class ChatActivity : AppCompatActivity() {
         loadChats(this)
 
 
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -69,7 +79,7 @@ class ChatActivity : AppCompatActivity() {
     private fun sendMessage(context: Context) {
         val txtMessage = findViewById<EditText>(R.id.eTxtChatMessage)
         val jsonObject = JSONObject()
-        jsonObject.put("user_one", userOne)
+        jsonObject.put("user_one", userDBModel?.idUser)
         jsonObject.put("user_two", userTwo)
         jsonObject.put("message", txtMessage.text)
         jsonObject.put("message_room", messageRoom)
@@ -109,24 +119,36 @@ class ChatActivity : AppCompatActivity() {
     private fun loadChats(context: Context) {
         chatModel = ArrayList()
         val queue = Volley.newRequestQueue(context)
-        val url = resources.getString(R.string.get_personal_messages_by_id) + "id_one=" + userOne + "&" + "id_two=" + userTwo
+        val url = resources.getString(R.string.get_personal_messages_by_id) + "id_one=" + userDBModel?.idUser + "&" + "id_two=" + userTwo
 
         try {
             val jsonRequest = JsonObjectRequest(Request.Method.GET, url, null,
                     Response.Listener<JSONObject> { response ->
                         if (response != null) {
                             val messagesChat = response.getJSONArray("messagePersonal")
-                            messageRoom = response.getJSONArray("messagePersonalRoom").getJSONObject(0).getString("_id")
-                            for (i in 0..(messagesChat.length() - 1)) {
-                                val messageChat = messagesChat.getJSONObject(i).getString("message")
-                                val imageChat = "https://s3.amazonaws.com/uifaces/faces/twitter/VMilescu/128.jpg"
-                                val createdByChat = messagesChat.getJSONObject(i).getString("created_by")
-                                chatModel.add(ChatModel(createdByChat, imageChat, messageChat))
+                            if(messagesChat.length() > 0){
+                                messageRoom = response.getJSONArray("messagePersonalRoom").getJSONObject(0).getString("_id")
+                                for (i in 0..(messagesChat.length() - 1)) {
+                                    val messageChat = messagesChat.getJSONObject(i).getString("message")
+                                    val imageChat = "https://s3.amazonaws.com/uifaces/faces/twitter/VMilescu/128.jpg"
+                                    val createdByChat = messagesChat.getJSONObject(i).getString("created_by")
+                                    chatModel.add(ChatModel(createdByChat, imageChat, messageChat))
+                                }
+                                chatAdapter = ChatAdapter(chatModel, userDBModel?.idUser as String)
+                                recyclerView.adapter = chatAdapter
+                                recyclerView.adapter?.notifyDataSetChanged()
                             }
-                            chatAdapter = ChatAdapter(chatModel, userOne)
+                            else{
+                                messageRoom = "0"
+                                chatAdapter = ChatAdapter(chatModel, userDBModel?.idUser as String)
+                                recyclerView.adapter = chatAdapter
+                                recyclerView.adapter?.notifyDataSetChanged()
+                            }
+
+                        } else {
+                            chatAdapter = ChatAdapter(chatModel, userDBModel?.idUser as String)
                             recyclerView.adapter = chatAdapter
                             recyclerView.adapter?.notifyDataSetChanged()
-                        } else {
                             messageRoom = "0"
                             Toast.makeText(context, R.string.register_not_found, Toast.LENGTH_SHORT).show()
                         }

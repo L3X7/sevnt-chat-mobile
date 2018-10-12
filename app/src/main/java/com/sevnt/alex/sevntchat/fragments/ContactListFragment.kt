@@ -1,5 +1,7 @@
 package com.sevnt.alex.sevntchat.fragments
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -13,8 +15,11 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
 import com.sevnt.alex.sevntchat.R
+import com.sevnt.alex.sevntchat.activities.LoginActivity
 import com.sevnt.alex.sevntchat.adapters.ContactListAdapter
+import com.sevnt.alex.sevntchat.helpers.UserDataBaseHelper
 import com.sevnt.alex.sevntchat.models.ContactListModel
+import com.sevnt.alex.sevntchat.models.UserDBModel
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
@@ -23,6 +28,7 @@ class ContactListFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var contactListModel: ArrayList<ContactListModel>
     private lateinit var contactListAdapter: ContactListAdapter
+    private var userDBModel: UserDBModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +37,16 @@ class ContactListFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_contact_list, container, false)
+
+        val dbHandler = UserDataBaseHelper(v.context as Context)
+        userDBModel = dbHandler.findFirstUser()
+        if(userDBModel == null){
+            val intent = Intent(v.context, LoginActivity::class.java)
+            startActivity(intent)
+            activity?.finish()
+
+        }
+
         recyclerView = v.findViewById(R.id.rViewContact)
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.setHasFixedSize(true)
@@ -41,8 +57,7 @@ class ContactListFragment : Fragment() {
     }
 
     private fun loadContacts(itemView: View) {
-        val idUser = "5bbcf21fc2e5dd0015ff7e1d"
-        val url = resources.getString(R.string.get_contact_by_iuser) + idUser
+        val url = resources.getString(R.string.get_contact_by_iuser) + userDBModel?.idUser
         val queue = Volley.newRequestQueue(itemView.context)
         contactListModel = ArrayList()
         try {
