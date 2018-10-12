@@ -16,6 +16,7 @@ import com.sevnt.alex.sevntchat.R
 import com.sevnt.alex.sevntchat.adapters.ContactListAdapter
 import com.sevnt.alex.sevntchat.models.ContactListModel
 import org.json.JSONArray
+import org.json.JSONObject
 import java.lang.Exception
 
 class ContactListFragment : Fragment() {
@@ -52,7 +53,8 @@ class ContactListFragment : Fragment() {
                                 val jsonObject = response.getJSONObject(i).getJSONObject("contact_user")
                                 val nameContact = jsonObject.getString("first_name") + " " + jsonObject.getString("surname")
                                 val imageContact = jsonObject.getString("user_image")
-                                contactListModel.add(ContactListModel(imageContact, nameContact))
+                                val idContact = jsonObject.getString("_id")
+                                contactListModel.add(ContactListModel(imageContact, nameContact, idContact))
                             }
                             recyclerView.adapter?.notifyDataSetChanged()
                         } else {

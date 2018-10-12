@@ -26,9 +26,10 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@drawable/shape_chat"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_chat_user_two"
             android:orientation="horizontal"
+            android:layout_marginLeft="5dp"
             android:padding="5dp">
 
             <TextView
@@ -51,14 +52,16 @@
         android:padding="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        >
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@drawable/shape_chat"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_chat_user_one"
             android:orientation="horizontal"
-            android:padding="5dp">
+            android:padding="5dp"
+            android:layout_marginRight="5dp">
 
             <TextView
                 android:layout_width="match_parent"

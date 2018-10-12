@@ -1,11 +1,32 @@
 <resources>
     <string name="app_name">SevntChat</string>
 
+    <!--Http Status-->
+    <integer name="http_status_success">200</integer>
+    <integer name="http_status_error">500</integer>
+    <integer name="http_status_not_found">404</integer>
+
     <!--URL's-->
+
+    <!--Authentication-->
+    <string name="login_user">https://sevnt-chat-api.herokuapp.com/api/user/login</string>
+
     <!--Contacts-->
     <string name="get_contact_by_iuser">https://sevnt-chat-api.herokuapp.com/api/contact/get-contact-by-iuser?id=</string>
+
+    <!--Chats-->
+    <string name="get_personal_messages_by_id">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/get-messages-by-id?</string>
+    <string name="create_message_personal">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/create-message</string>
+
+    <!--Login notifications-->
+    <string name="error_request_login">Ocurrio un error en la transacción.</string>
+    <string name="error_invalid_credentials_login">Usuario o contraseña invalida.</string>
+    <string name="error_empty_values_login">Ingrese el usuario y contraseña.</string>
 
     <!--Messages from request-->
     <string name="register_not_found">No se encontraron registros</string>
     <string name="error_request">Hubo error al realizar la busqueda</string>
+
+    <string name="message_saved">Mensaje enviado</string>
+    <string name="error_request__message_save">Hubo error al guardar el mensaje</string>
 </resources>
