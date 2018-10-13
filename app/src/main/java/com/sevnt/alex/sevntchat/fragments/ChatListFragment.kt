@@ -16,6 +16,7 @@ class ChatListFragment : Fragment() {
     private lateinit var chatListModel: ArrayList<ChatListModel>
     private lateinit var chatListAdapter: ChatListAdapter
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         loadInformation()
@@ -33,7 +34,6 @@ class ChatListFragment : Fragment() {
 
     private fun loadInformation() {
         chatListModel = ArrayList()
-
 
 
     }

@@ -56,4 +56,17 @@
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"></android.support.v4.view.ViewPager>
 
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_person_add"
+        android:backgroundTint="@color/colorSecondaryPrimary"
+        app:backgroundTint="@color/colorSecondaryPrimary"
+        android:layout_margin="16dp"
+        android:id="@+id/fActionBtnAddContact"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_gravity="bottom|end"
+        />
+
 </android.support.design.widget.CoordinatorLayout>

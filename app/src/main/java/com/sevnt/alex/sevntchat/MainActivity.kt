@@ -1,12 +1,13 @@
 package com.sevnt.alex.sevntchat
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import com.sevnt.alex.sevntchat.activities.LoginActivity
+import com.sevnt.alex.sevntchat.activities.SearchContactActivity
 import com.sevnt.alex.sevntchat.adapters.TabViewPageAdapter
 import com.sevnt.alex.sevntchat.fragments.ChatListFragment
 import com.sevnt.alex.sevntchat.fragments.ContactListFragment
@@ -19,10 +20,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mViewPager: ViewPager
     private lateinit var mTabLayout: TabLayout
     private var userDBModel: UserDBModel? = null
+    private lateinit var fActionBarContact: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        fActionBarContact = findViewById(R.id.fActionBtnAddContact)
+        fActionBarContact.setOnClickListener {
+            val intent = Intent(this, SearchContactActivity::class.java)
+            startActivity(intent)
+        }
 
         val dbHandler = UserDataBaseHelper(this)
         userDBModel = dbHandler.findFirstUser()

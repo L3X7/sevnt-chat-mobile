@@ -64,7 +64,6 @@ class ChatActivity : AppCompatActivity() {
         recyclerView.setHasFixedSize(true)
         loadChats(this)
 
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

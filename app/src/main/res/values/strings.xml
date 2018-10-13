@@ -8,8 +8,9 @@
 
     <!--URL's-->
 
-    <!--Authentication-->
+    <!--Users-->
     <string name="login_user">https://sevnt-chat-api.herokuapp.com/api/user/login</string>
+    <string name="find_users">https://sevnt-chat-api.herokuapp.com/api/user/find-users?username=</string>
 
     <!--Contacts-->
     <string name="get_contact_by_iuser">https://sevnt-chat-api.herokuapp.com/api/contact/get-contact-by-iuser?id=</string>
@@ -17,6 +18,10 @@
     <!--Chats-->
     <string name="get_personal_messages_by_id">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/get-messages-by-id?</string>
     <string name="create_message_personal">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/create-message</string>
+
+
+    <!--Search notifications-->
+    <string name="error_empty_values_search">Ingrese un valor de busqueda.</string>
 
     <!--Login notifications-->
     <string name="error_request_login">Ocurrio un error en la transacción.</string>
