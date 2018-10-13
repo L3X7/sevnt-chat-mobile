@@ -23,7 +23,7 @@ class UserSearchInformationActivity : AppCompatActivity() {
         txtViewNameUserSearchInformation = findViewById(R.id.txtViewNameUserSearchInformation)
         txtViewUserNameUserSearchInformation = findViewById(R.id.txtViewUserNameUserSearchInformation)
         txtViewLocationUserSearchInformation = findViewById(R.id.txtViewLocationUserSearchInformation)
-        
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
