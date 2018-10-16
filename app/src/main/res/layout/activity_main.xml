@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:paddingTop="8dp"
         android:id="@+id/app_bar"
+
         >
 
         <android.support.v7.widget.Toolbar
@@ -22,6 +23,7 @@
             app:layout_scrollFlags="scroll|enterAlways"
             app:title="SevntChat"
             android:id="@+id/toolbar_tab"
+            app:popupTheme="@style/AppTheme.Menu"
             />
 
         <android.support.design.widget.TabLayout

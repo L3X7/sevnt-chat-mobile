@@ -87,6 +87,7 @@ class LoginActivity : AppCompatActivity() {
                                         }
 
                                         val intent = Intent(context, MainActivity::class.java)
+                                        this.finish()
                                         startActivity(intent)
                                     } else {
                                         Toast.makeText(context, R.string.error_invalid_credentials_login, Toast.LENGTH_SHORT).show()

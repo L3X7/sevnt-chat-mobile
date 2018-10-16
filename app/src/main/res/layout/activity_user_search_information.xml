@@ -72,7 +72,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:theme="@style/AppTheme.Button"
-            android:text="Agregar" />
+            android:text="Agregar"
+            android:id="@+id/btnAddNewContact"/>
     </LinearLayout>
 
 </LinearLayout>

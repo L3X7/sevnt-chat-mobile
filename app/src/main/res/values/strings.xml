@@ -4,6 +4,7 @@
     <!--Http Status-->
     <integer name="http_status_success">200</integer>
     <integer name="http_status_error">500</integer>
+    <integer name="http_status_bad_request">400</integer>
     <integer name="http_status_not_found">404</integer>
 
     <!--URL's-->
@@ -11,9 +12,14 @@
     <!--Users-->
     <string name="login_user">https://sevnt-chat-api.herokuapp.com/api/user/login</string>
     <string name="find_users">https://sevnt-chat-api.herokuapp.com/api/user/find-users?username=</string>
+    <string name="create_user">https://sevnt-chat-api.herokuapp.com/api//user/create-user</string>
 
     <!--Contacts-->
     <string name="get_contact_by_iuser">https://sevnt-chat-api.herokuapp.com/api/contact/get-contact-by-iuser?id=</string>
+    <string name="create_new_contact">https://sevnt-chat-api.herokuapp.com/api/contact/create-contact</string>
+    <string name="contact_already_exist">El contacto ya esta su lista</string>
+    <string name="contact_createad">Contacto creado con exito</string>
+    <string name="add_contact_not_available">No se puede agregar usted mismo como contacto</string>
 
     <!--Chats-->
     <string name="get_chats_by_room">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/get-messages-by-room?id_one=</string>
@@ -28,6 +34,10 @@
     <string name="error_request_login">Ocurrio un error en la transacción.</string>
     <string name="error_invalid_credentials_login">Usuario o contraseña invalida.</string>
     <string name="error_empty_values_login">Ingrese el usuario y contraseña.</string>
+
+    <!--Register notification-->
+    <string name="error_empty_values_register">Complete todos los campos</string>
+    <string name="username_already_exist">El username ya no esta disponible</string>
 
     <!--Messages from request-->
     <string name="register_not_found">No se encontraron registros</string>
