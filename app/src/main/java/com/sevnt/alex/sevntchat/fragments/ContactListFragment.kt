@@ -66,10 +66,11 @@ class ContactListFragment : Fragment() {
                         if (response != null) {
                             for (i in 0..(response.length() - 1)) {
                                 val jsonObject = response.getJSONObject(i).getJSONObject("contact_user")
+                                val userNameContact = jsonObject.getString("first_name") + " " + jsonObject.getString("username")
                                 val nameContact = jsonObject.getString("first_name") + " " + jsonObject.getString("surname")
                                 val imageContact = jsonObject.getString("user_image")
                                 val idContact = jsonObject.getString("_id")
-                                contactListModel.add(ContactListModel(imageContact, nameContact, idContact))
+                                contactListModel.add(ContactListModel(imageContact, nameContact, idContact, userNameContact))
                             }
                             recyclerView.adapter?.notifyDataSetChanged()
                         } else {

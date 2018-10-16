@@ -35,7 +35,10 @@ class SearchContactListAdapter(private val contactListModel: List<ContactListMod
         holder.textNameContact.text = listModel.nameUser
         holder.layoutContact.setOnClickListener {
             val intent = Intent(context, UserSearchInformationActivity()::class.java)
+            intent.putExtra("username", listModel.userName)
             intent.putExtra("idContact", listModel.idUser)
+            intent.putExtra("imgContact", listModel.imgUrl)
+            intent.putExtra("nameUserContact", listModel.nameUser)
             context.startActivity(intent)
         }
 

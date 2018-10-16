@@ -1,3 +1,3 @@
 package com.sevnt.alex.sevntchat.models
 
-data class ContactListModel(val imgUrl: String, val nameUser: String, val idUser: String)
+data class ContactListModel(val imgUrl: String, val nameUser: String, val idUser: String, val userName: String)

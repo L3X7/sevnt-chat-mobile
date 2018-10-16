@@ -16,6 +16,7 @@
     <string name="get_contact_by_iuser">https://sevnt-chat-api.herokuapp.com/api/contact/get-contact-by-iuser?id=</string>
 
     <!--Chats-->
+    <string name="get_chats_by_room">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/get-messages-by-room?id_one=</string>
     <string name="get_personal_messages_by_id">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/get-messages-by-id?</string>
     <string name="create_message_personal">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/create-message</string>
 

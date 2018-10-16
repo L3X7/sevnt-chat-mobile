@@ -85,10 +85,11 @@ class SearchContactActivity : AppCompatActivity() {
                             val users = response.getJSONArray("users")
                             if (users.length() > 0) {
                                 for (i in 0..(users.length() - 1)) {
+                                    val userNameContact = users.getJSONObject(i).getString("first_name")
                                     val nameContact = users.getJSONObject(i).getString("first_name") + " " + users.getJSONObject(i).getString("surname")
                                     val imageContact = users.getJSONObject(i).getString("user_image")
                                     val idContact = users.getJSONObject(i).getString("_id")
-                                    contactListModel.add(ContactListModel(imageContact, nameContact, idContact))
+                                    contactListModel.add(ContactListModel(imageContact, nameContact, idContact, userNameContact))
                                 }
                             }
                             else{
