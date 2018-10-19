@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.EditText
@@ -15,6 +16,8 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.github.nkzawa.socketio.client.IO
+import com.github.nkzawa.socketio.client.Socket
 import com.sevnt.alex.sevntchat.R
 import com.sevnt.alex.sevntchat.adapters.ChatAdapter
 import com.sevnt.alex.sevntchat.helpers.UserDataBaseHelper
@@ -31,10 +34,14 @@ class ChatActivity : AppCompatActivity() {
     private var userDBModel: UserDBModel? = null
     private lateinit var userTwo: String
     private lateinit var messageRoom: String
+    private lateinit var mSocketIO: Socket
+    private val isFirstLoad = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+        mSocketIO = IO.socket("https://sevnt-chat-api-socket-io.herokuapp.com")
+
 
         val dbHandler = UserDataBaseHelper(this)
         userDBModel = dbHandler.findFirstUser()
@@ -47,6 +54,16 @@ class ChatActivity : AppCompatActivity() {
 
         val intent = intent
         userTwo = intent.getStringExtra("idContact")
+
+
+        mSocketIO.connect().on(Socket.EVENT_CONNECT) {
+
+        }.on(Socket.EVENT_DISCONNECT) {
+            startActivity(intent)
+            this.finish()
+            Toast.makeText(this, "Error in connect to server", Toast.LENGTH_SHORT).show()
+        }
+
         val toolbar = findViewById<Toolbar>(R.id.chatToolbar)
         setSupportActionBar(toolbar)
 
@@ -61,7 +78,7 @@ class ChatActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.rViewChatInteraction)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
-        loadChats(this)
+        getRoom(this)
 
     }
 
@@ -72,6 +89,13 @@ class ChatActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
 
+    }
+
+    private fun getRoom(context: Context){
+        val jsonObject = JSONObject()
+        jsonObject.put("user_one", userDBModel?.idUser)
+        jsonObject.put("user_two", userTwo)
+        val queue = Volley.newRequestQueue(context)
     }
 
     private fun sendMessage(context: Context) {
@@ -124,7 +148,7 @@ class ChatActivity : AppCompatActivity() {
                     Response.Listener<JSONObject> { response ->
                         if (response != null) {
                             val messagesChat = response.getJSONArray("messagePersonal")
-                            if(messagesChat.length() > 0){
+                            if (messagesChat.length() > 0) {
                                 messageRoom = response.getJSONArray("messagePersonalRoom").getJSONObject(0).getString("_id")
                                 for (i in 0..(messagesChat.length() - 1)) {
                                     val messageChat = messagesChat.getJSONObject(i).getString("message")
@@ -135,8 +159,7 @@ class ChatActivity : AppCompatActivity() {
                                 chatAdapter = ChatAdapter(chatModel, userDBModel?.idUser as String)
                                 recyclerView.adapter = chatAdapter
                                 recyclerView.adapter?.notifyDataSetChanged()
-                            }
-                            else{
+                            } else {
                                 messageRoom = "0"
                                 chatAdapter = ChatAdapter(chatModel, userDBModel?.idUser as String)
                                 recyclerView.adapter = chatAdapter
@@ -158,5 +181,10 @@ class ChatActivity : AppCompatActivity() {
         } catch (ex: Exception) {
             Toast.makeText(context, R.string.error_request, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun loadChatsSocket(context: Context){
+        chatModel = ArrayList()
+
     }
 }
