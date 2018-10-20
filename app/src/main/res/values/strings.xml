@@ -22,9 +22,12 @@
     <string name="add_contact_not_available">No se puede agregar usted mismo como contacto</string>
 
     <!--Chats-->
+    <string name="get_post_room_personal">https://sevnt-chat-api.herokuapp.com/api/message-personal-room/get-or-create-message-room</string>
     <string name="get_chats_by_room">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/get-messages-by-room?id_one=</string>
     <string name="get_personal_messages_by_id">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/get-messages-by-id?</string>
     <string name="create_message_personal">https://sevnt-chat-api.herokuapp.com/api/message-personal-service/create-message</string>
+
+    <string name="error_get_room_personal">Ocurrio un error al establecer el canal de conexión</string>
 
 
     <!--Search notifications-->

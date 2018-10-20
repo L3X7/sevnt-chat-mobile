@@ -16,6 +16,7 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.github.nkzawa.emitter.Emitter
 import com.github.nkzawa.socketio.client.IO
 import com.github.nkzawa.socketio.client.Socket
 import com.sevnt.alex.sevntchat.R
@@ -35,7 +36,6 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var userTwo: String
     private lateinit var messageRoom: String
     private lateinit var mSocketIO: Socket
-    private val isFirstLoad = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,8 +46,8 @@ class ChatActivity : AppCompatActivity() {
         val dbHandler = UserDataBaseHelper(this)
         userDBModel = dbHandler.findFirstUser()
         if (userDBModel == null) {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+            val intentLogin = Intent(this, LoginActivity::class.java)
+            startActivity(intentLogin)
             this.finish()
         }
 
@@ -59,9 +59,9 @@ class ChatActivity : AppCompatActivity() {
         mSocketIO.connect().on(Socket.EVENT_CONNECT) {
 
         }.on(Socket.EVENT_DISCONNECT) {
-            startActivity(intent)
+            Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
             this.finish()
-            Toast.makeText(this, "Error in connect to server", Toast.LENGTH_SHORT).show()
+
         }
 
         val toolbar = findViewById<Toolbar>(R.id.chatToolbar)
@@ -91,11 +91,52 @@ class ChatActivity : AppCompatActivity() {
 
     }
 
-    private fun getRoom(context: Context){
+    private fun getRoom(context: Context) {
         val jsonObject = JSONObject()
         jsonObject.put("user_one", userDBModel?.idUser)
         jsonObject.put("user_two", userTwo)
         val queue = Volley.newRequestQueue(context)
+        val url = resources.getString(R.string.get_post_room_personal)
+        try {
+            val jsonRequest = JsonObjectRequest(Request.Method.POST, url, jsonObject,
+                    Response.Listener<JSONObject> { response ->
+                        if (response != null) {
+                            val requestMessage = response.getInt("status")
+                            when (requestMessage) {
+                                resources.getInteger(R.integer.http_status_success) -> {
+                                    messageRoom = response.getString("room")
+                                    mSocketIO.emit("subscribe", messageRoom)
+//                                    mSocketIO.on("")
+
+                                }
+                                resources.getInteger(R.integer.http_status_error) -> {
+                                    Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
+                                    this.finish()
+                                }
+                                resources.getInteger(R.integer.http_status_not_found) -> {
+                                    Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
+                                    this.finish()
+                                }
+                                else -> {
+                                    Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
+                                    this.finish()
+                                }
+                            }
+
+                        } else {
+                            Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
+                            this.finish()
+                        }
+                    },
+                    Response.ErrorListener {
+                        Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
+                        this.finish()
+                    })
+            queue.add(jsonRequest)
+        } catch (exception: Exception) {
+            Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
+            this.finish()
+        }
     }
 
     private fun sendMessage(context: Context) {
@@ -114,12 +155,12 @@ class ChatActivity : AppCompatActivity() {
                             val requestMessage = response.getInt("status")
                             if (requestMessage == 0) {
                                 txtMessage.text.clear()
-                                loadChats(context)
+//                                loadChats(context)
                                 Toast.makeText(context, R.string.message_saved, Toast.LENGTH_SHORT).show()
-                                messageRoom = response.getString("messagePersonalRoom")
+//                                messageRoom = response.getString("messagePersonalRoom")
                             } else {
-                                loadChats(context)
-                                messageRoom = response.getString("messagePersonalRoom")
+//                                loadChats(context)
+//                                messageRoom = response.getString("messagePersonalRoom")
                                 Toast.makeText(context, R.string.error_request__message_save, Toast.LENGTH_SHORT).show()
                             }
                         } else {
@@ -183,8 +224,11 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadChatsSocket(context: Context){
-        chatModel = ArrayList()
-
+    private val emitterListening = Emitter.Listener { data ->
+        this@ChatActivity.runOnUiThread {
+            val dataInfo = data[0] as JSONObject
+            Log.i("Messages", dataInfo.toString())
+        }
     }
+
 }
