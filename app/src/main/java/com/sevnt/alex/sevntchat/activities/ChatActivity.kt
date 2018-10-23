@@ -26,6 +26,7 @@ import com.sevnt.alex.sevntchat.models.ChatModel
 import com.sevnt.alex.sevntchat.models.UserDBModel
 import org.json.JSONObject
 import java.lang.Exception
+import java.util.*
 
 class ChatActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -56,6 +57,7 @@ class ChatActivity : AppCompatActivity() {
         userTwo = intent.getStringExtra("idContact")
 
 
+        mSocketIO.on("get-message-personal", newMessage)
         mSocketIO.connect().on(Socket.EVENT_CONNECT) {
 
         }.on(Socket.EVENT_DISCONNECT) {
@@ -72,7 +74,7 @@ class ChatActivity : AppCompatActivity() {
 
         btnSendMessage = findViewById(R.id.btnChatSendMessage)
         btnSendMessage.setOnClickListener {
-            sendMessage(this)
+            sendMessage()
         }
 
         recyclerView = findViewById(R.id.rViewChatInteraction)
@@ -93,8 +95,8 @@ class ChatActivity : AppCompatActivity() {
 
     private fun getRoom(context: Context) {
         val jsonObject = JSONObject()
-        jsonObject.put("user_one", userDBModel?.idUser)
-        jsonObject.put("user_two", userTwo)
+        jsonObject.put("id_one", userDBModel?.idUser)
+        jsonObject.put("id_two", userTwo)
         val queue = Volley.newRequestQueue(context)
         val url = resources.getString(R.string.get_post_room_personal)
         try {
@@ -106,8 +108,7 @@ class ChatActivity : AppCompatActivity() {
                                 resources.getInteger(R.integer.http_status_success) -> {
                                     messageRoom = response.getString("room")
                                     mSocketIO.emit("subscribe", messageRoom)
-//                                    mSocketIO.on("")
-
+                                    loadChats(context)
                                 }
                                 resources.getInteger(R.integer.http_status_error) -> {
                                     Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
@@ -139,44 +140,13 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendMessage(context: Context) {
+    private fun sendMessage() {
         val txtMessage = findViewById<EditText>(R.id.eTxtChatMessage)
         val jsonObject = JSONObject()
         jsonObject.put("user_one", userDBModel?.idUser)
-        jsonObject.put("user_two", userTwo)
         jsonObject.put("message", txtMessage.text)
         jsonObject.put("message_room", messageRoom)
-        val queue = Volley.newRequestQueue(context)
-        val url = resources.getString(R.string.create_message_personal)
-        try {
-            val jsonRequest = JsonObjectRequest(Request.Method.POST, url, jsonObject,
-                    Response.Listener<JSONObject> { response ->
-                        if (response != null) {
-                            val requestMessage = response.getInt("status")
-                            if (requestMessage == 0) {
-                                txtMessage.text.clear()
-//                                loadChats(context)
-                                Toast.makeText(context, R.string.message_saved, Toast.LENGTH_SHORT).show()
-//                                messageRoom = response.getString("messagePersonalRoom")
-                            } else {
-//                                loadChats(context)
-//                                messageRoom = response.getString("messagePersonalRoom")
-                                Toast.makeText(context, R.string.error_request__message_save, Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            Toast.makeText(context, R.string.error_request__message_save, Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    Response.ErrorListener {
-                        Toast.makeText(context, R.string.error_request__message_save, Toast.LENGTH_SHORT).show()
-                    })
-            queue.add(jsonRequest)
-
-        } catch (exception: Exception) {
-            Toast.makeText(context, R.string.error_request__message_save, Toast.LENGTH_SHORT).show()
-        }
-
-
+        mSocketIO.emit("create-message-personal", jsonObject)
     }
 
     private fun loadChats(context: Context) {
@@ -190,7 +160,6 @@ class ChatActivity : AppCompatActivity() {
                         if (response != null) {
                             val messagesChat = response.getJSONArray("messagePersonal")
                             if (messagesChat.length() > 0) {
-                                messageRoom = response.getJSONArray("messagePersonalRoom").getJSONObject(0).getString("_id")
                                 for (i in 0..(messagesChat.length() - 1)) {
                                     val messageChat = messagesChat.getJSONObject(i).getString("message")
                                     val imageChat = "https://s3.amazonaws.com/uifaces/faces/twitter/VMilescu/128.jpg"
@@ -201,7 +170,6 @@ class ChatActivity : AppCompatActivity() {
                                 recyclerView.adapter = chatAdapter
                                 recyclerView.adapter?.notifyDataSetChanged()
                             } else {
-                                messageRoom = "0"
                                 chatAdapter = ChatAdapter(chatModel, userDBModel?.idUser as String)
                                 recyclerView.adapter = chatAdapter
                                 recyclerView.adapter?.notifyDataSetChanged()
@@ -211,7 +179,6 @@ class ChatActivity : AppCompatActivity() {
                             chatAdapter = ChatAdapter(chatModel, userDBModel?.idUser as String)
                             recyclerView.adapter = chatAdapter
                             recyclerView.adapter?.notifyDataSetChanged()
-                            messageRoom = "0"
                             Toast.makeText(context, R.string.register_not_found, Toast.LENGTH_SHORT).show()
                         }
                     },
@@ -224,11 +191,36 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    private val emitterListening = Emitter.Listener { data ->
-        this@ChatActivity.runOnUiThread {
-            val dataInfo = data[0] as JSONObject
-            Log.i("Messages", dataInfo.toString())
+    private val newMessage = Emitter.Listener { data ->
+
+        this.runOnUiThread {
+            Runnable {
+                run {
+                    val dataMessage = data[0] as JSONObject
+                    try {
+                        val status = dataMessage.getInt("status")
+                        when(status){
+                            resources.getInteger(R.integer.http_status_success) -> {
+                                val messageCreated = dataMessage.getJSONObject("messagePersonal")
+                                val createdBy = messageCreated.getString("created_by")
+                                val imageChat = "https://s3.amazonaws.com/uifaces/faces/twitter/VMilescu/128.jpg"
+                                val messageChat = messageCreated.getString("message")
+                                addMessage(createdBy, imageChat, messageChat)
+                            }
+                        }
+                    }
+                    catch (exception: Exception){
+                        return@run
+                    }
+                }
+            }
         }
+    }
+
+    private fun addMessage(createdBy: String, imgChat: String,message: String){
+        chatModel.add(ChatModel(createdBy,imgChat,message))
+        recyclerView.adapter?.notifyItemInserted(chatModel.size -1)
+
     }
 
 }
