@@ -12,7 +12,7 @@
     <!--Users-->
     <string name="login_user">https://sevnt-chat-api.herokuapp.com/api/user/login</string>
     <string name="find_users">https://sevnt-chat-api.herokuapp.com/api/user/find-users?username=</string>
-    <string name="create_user">https://sevnt-chat-api.herokuapp.com/api//user/create-user</string>
+    <string name="create_user">https://sevnt-chat-api.herokuapp.com/api/user/create-user</string>
 
     <!--Contacts-->
     <string name="get_contact_by_iuser">https://sevnt-chat-api.herokuapp.com/api/contact/get-contact-by-iuser?id=</string>

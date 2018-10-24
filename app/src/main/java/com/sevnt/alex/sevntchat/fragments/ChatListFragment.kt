@@ -72,12 +72,24 @@ class ChatListFragment : Fragment() {
                                     var userChat: String
                                     var messageChat: String
                                     var hourChat: String
-                                    var idContact :String
+                                    var idContact: String
+                                    var stringToDate: String
 
                                     val objectRoom = messagesRoom.getJSONObject(i)
                                     val userOneRoom = objectRoom.getJSONObject("user_one")
                                     val userTwoRoom = objectRoom.getJSONObject("user_two")
-                                    val objectMessage = messages.getJSONObject(i)
+
+                                    if (messages.length() > 0) {
+                                        val objectMessage = messages.getJSONObject(i)
+                                        messageChat = objectMessage.getString("message")
+                                        hourChat = objectMessage.getString("created_date")
+                                        val localePhone = Locale.getDefault()
+                                        val inputDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", localePhone)
+                                        stringToDate = inputDate.parse(hourChat).toLocaleString()
+                                    } else {
+                                        messageChat = ""
+                                        stringToDate = ""
+                                    }
 
                                     if (userDBModel?.idUser != userOneRoom.getString("_id")) {
                                         imgChat = userOneRoom.getString("user_image")
@@ -89,16 +101,6 @@ class ChatListFragment : Fragment() {
                                         userChat = userTwoRoom.getString("first_name") + " " + userTwoRoom.getString("surname")
                                         idContact = userTwoRoom.getString("_id")
                                     }
-
-                                    messageChat = objectMessage.getString("message")
-                                    hourChat = objectMessage.getString("created_date")
-
-                                    val localePhone = Locale.getDefault()
-                                    val inputDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss",localePhone)
-                                    val outPutDate = SimpleDateFormat("dd/MM/yy hh:mm")
-                                    val stringToDate = inputDate.parse(hourChat).toLocaleString()
-//                                    val stringOutPut = outPutDate.format(stringToDate)
-
 
                                     chatListModel.add(ChatListModel(imgChat, userChat, messageChat, stringToDate, idContact))
                                 }

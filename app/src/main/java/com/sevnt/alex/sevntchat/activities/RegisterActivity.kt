@@ -37,11 +37,11 @@ class RegisterActivity : AppCompatActivity() {
         btnRegister = findViewById(R.id.btnRegister)
 
         btnRegister.setOnClickListener {
-            Register(this)
+            register(this)
         }
     }
 
-    private fun Register(context: Context) {
+    private fun register(context: Context) {
         val url = resources.getString(R.string.create_user)
         val queue = Volley.newRequestQueue(context)
         val name = txtRegisterName.text.toString()
@@ -54,6 +54,7 @@ class RegisterActivity : AppCompatActivity() {
             jsonObject.put("password", password)
             jsonObject.put("first_name", name)
             jsonObject.put("surname", surName)
+            jsonObject.put("user_image", "https://cdn3.iconfinder.com/data/icons/google-material-design-icons/48/ic_account_circle_48px-512.png")
             try {
 
                 val jsonRequest = JsonObjectRequest(Request.Method.POST, url, jsonObject,
@@ -76,7 +77,7 @@ class RegisterActivity : AppCompatActivity() {
 
                                     }
                                     resources.getInteger(R.integer.http_status_bad_request) -> {
-                                        Toast.makeText(context, R.string.contact_already_exist, Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, R.string.username_already_exist, Toast.LENGTH_SHORT).show()
                                     }
                                     else -> {
                                         Toast.makeText(context, R.string.error_request_login, Toast.LENGTH_SHORT).show()
@@ -88,7 +89,6 @@ class RegisterActivity : AppCompatActivity() {
                             }
                         },
                         Response.ErrorListener {
-                            Log.e("register", it.toString())
                             Toast.makeText(context, R.string.error_request_login, Toast.LENGTH_SHORT).show()
                         })
 

@@ -3,6 +3,7 @@ package com.sevnt.alex.sevntchat.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -57,12 +58,28 @@ class ChatActivity : AppCompatActivity() {
         userTwo = intent.getStringExtra("idContact")
 
 
-        mSocketIO.on("get-message-personal", newMessage)
+//        mSocketIO.on("get-message-personal", newMessage)
+        mSocketIO.on("get-message-personal") { args ->
+            val dataMessage = args[0] as JSONObject
+            try {
+                val status = dataMessage.getInt("status")
+                when (status) {
+                    resources.getInteger(R.integer.http_status_success) -> {
+                        val messageCreated = dataMessage.getJSONObject("messagePersonal")
+                        val createdBy = messageCreated.getString("created_by")
+                        val imageChat = "https://s3.amazonaws.com/uifaces/faces/twitter/VMilescu/128.jpg"
+                        val messageChat = messageCreated.getString("message")
+                        addMessage(createdBy, imageChat, messageChat)
+                    }
+                }
+            } catch (exception: Exception) {
+                Log.e("Error Socket", exception.toString())
+            }
+        }
+
         mSocketIO.connect().on(Socket.EVENT_CONNECT) {
 
         }.on(Socket.EVENT_DISCONNECT) {
-            Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
-            this.finish()
 
         }
 
@@ -146,7 +163,13 @@ class ChatActivity : AppCompatActivity() {
         jsonObject.put("user_one", userDBModel?.idUser)
         jsonObject.put("message", txtMessage.text)
         jsonObject.put("message_room", messageRoom)
-        mSocketIO.emit("create-message-personal", jsonObject)
+        try {
+            mSocketIO.emit("create-message-personal", jsonObject)
+        }
+        catch (exception: Exception){
+            Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     private fun loadChats(context: Context) {
@@ -169,6 +192,7 @@ class ChatActivity : AppCompatActivity() {
                                 chatAdapter = ChatAdapter(chatModel, userDBModel?.idUser as String)
                                 recyclerView.adapter = chatAdapter
                                 recyclerView.adapter?.notifyDataSetChanged()
+                                scrollToBottom()
                             } else {
                                 chatAdapter = ChatAdapter(chatModel, userDBModel?.idUser as String)
                                 recyclerView.adapter = chatAdapter
@@ -191,36 +215,20 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    private val newMessage = Emitter.Listener { data ->
-
-        this.runOnUiThread {
-            Runnable {
-                run {
-                    val dataMessage = data[0] as JSONObject
-                    try {
-                        val status = dataMessage.getInt("status")
-                        when(status){
-                            resources.getInteger(R.integer.http_status_success) -> {
-                                val messageCreated = dataMessage.getJSONObject("messagePersonal")
-                                val createdBy = messageCreated.getString("created_by")
-                                val imageChat = "https://s3.amazonaws.com/uifaces/faces/twitter/VMilescu/128.jpg"
-                                val messageChat = messageCreated.getString("message")
-                                addMessage(createdBy, imageChat, messageChat)
-                            }
-                        }
-                    }
-                    catch (exception: Exception){
-                        return@run
-                    }
-                }
-            }
-        }
+    private fun scrollToBottom(){
+        recyclerView.smoothScrollToPosition(chatAdapter.itemCount - 1)
     }
 
-    private fun addMessage(createdBy: String, imgChat: String,message: String){
-        chatModel.add(ChatModel(createdBy,imgChat,message))
-        recyclerView.adapter?.notifyItemInserted(chatModel.size -1)
+    private fun addMessage(createdBy: String, imgChat: String, message: String) {
+        chatModel.add(ChatModel(createdBy, imgChat, message))
+        chatAdapter.notifyItemInserted(chatModel.size - 1)
 
+        scrollToBottom()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mSocketIO.disconnect()
+        mSocketIO.off("get-message-personal")
+    }
 }
