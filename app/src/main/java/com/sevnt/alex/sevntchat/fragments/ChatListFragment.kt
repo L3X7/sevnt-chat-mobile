@@ -79,7 +79,7 @@ class ChatListFragment : Fragment() {
                                     val userOneRoom = objectRoom.getJSONObject("user_one")
                                     val userTwoRoom = objectRoom.getJSONObject("user_two")
 
-                                    if (messages.length() > 0) {
+                                    if (i <  messages.length()) {
                                         val objectMessage = messages.getJSONObject(i)
                                         messageChat = objectMessage.getString("message")
                                         hourChat = objectMessage.getString("created_date")

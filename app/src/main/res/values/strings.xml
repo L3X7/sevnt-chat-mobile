@@ -45,7 +45,7 @@
     <!--Messages from request-->
     <string name="register_not_found">No se encontraron registros</string>
     <string name="error_request">Hubo error al realizar la busqueda</string>
-
+    <string name="insert_message">Ingrese un mensaje</string>
     <string name="message_saved">Mensaje enviado</string>
     <string name="error_request__message_save">Hubo error al guardar el mensaje</string>
 </resources>

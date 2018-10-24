@@ -35,6 +35,7 @@ class ContactListAdapter(private val contactListModel: List<ContactListModel>, p
         holder.layoutContact.setOnClickListener {
             val intent = Intent(context, ChatActivity()::class.java)
             intent.putExtra("idContact", listModel.idUser)
+            intent.putExtra("nameUser", listModel.nameUser)
             context.startActivity(intent)
         }
 

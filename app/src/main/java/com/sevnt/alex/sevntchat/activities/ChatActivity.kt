@@ -8,10 +8,15 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
+import android.view.KeyEvent
 import android.view.MenuItem
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.Response
@@ -33,11 +38,14 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var chatModel: ArrayList<ChatModel>
     private lateinit var chatAdapter: ChatAdapter
+    private lateinit var txtMessage: EditText
     private lateinit var btnSendMessage: Button
     private var userDBModel: UserDBModel? = null
     private lateinit var userTwo: String
     private lateinit var messageRoom: String
     private lateinit var mSocketIO: Socket
+    private lateinit var nameOtherUSer: String
+    private var isTyping = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,12 +61,12 @@ class ChatActivity : AppCompatActivity() {
             this.finish()
         }
 
+        txtMessage = findViewById(R.id.eTxtChatMessage)
 
         val intent = intent
         userTwo = intent.getStringExtra("idContact")
+        nameOtherUSer = intent.getStringExtra("nameUser")
 
-
-//        mSocketIO.on("get-message-personal", newMessage)
         mSocketIO.on("get-message-personal") { args ->
             val dataMessage = args[0] as JSONObject
             try {
@@ -71,9 +79,40 @@ class ChatActivity : AppCompatActivity() {
                         val messageChat = messageCreated.getString("message")
                         addMessage(createdBy, imageChat, messageChat)
                     }
+                    resources.getInteger(R.integer.http_status_error) -> {
+                        Log.e("Error Socket", "Error controlled")
+                    }
                 }
             } catch (exception: Exception) {
                 Log.e("Error Socket", exception.toString())
+            }
+        }
+
+        mSocketIO.on("typing") { args ->
+            val dataTyping = args[0] as JSONObject
+            try {
+                val userMessage = dataTyping.getString("message")
+                val idUserTyping = dataTyping.getString("id")
+                if (idUserTyping != userDBModel?.idUser) {
+                    addTypingBar(userMessage)
+                } else {
+                    removeTypingBar()
+                }
+
+
+            } catch (exception: Exception) {
+                removeTypingBar()
+            }
+        }
+        mSocketIO.on("stop_typing") {args ->
+            val dataTyping = args[0] as JSONObject
+            try {
+                val idUserTyping = dataTyping.getString("id")
+                if (idUserTyping != userDBModel?.idUser) {
+                    removeTypingBar()
+                }
+            }catch (exception: Exception){
+                removeTypingBar()
             }
         }
 
@@ -88,11 +127,46 @@ class ChatActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
+        supportActionBar?.title = nameOtherUSer
+
 
         btnSendMessage = findViewById(R.id.btnChatSendMessage)
         btnSendMessage.setOnClickListener {
             sendMessage()
         }
+
+
+        txtMessage.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (txtMessage == null) return
+                if (!mSocketIO.connected()) {
+                    removeTypingBar()
+                    isTyping = false
+                    return
+                }
+                val textMessage = txtMessage.text.toString()
+                if(textMessage != ""){
+                    if(!isTyping){
+                        isTyping = true
+                        addTyping()
+                    }
+                }
+                else{
+                    isTyping = false
+                    removeTyping()
+                }
+
+
+            }
+
+        })
 
         recyclerView = findViewById(R.id.rViewChatInteraction)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -158,15 +232,21 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun sendMessage() {
-        val txtMessage = findViewById<EditText>(R.id.eTxtChatMessage)
+        supportActionBar?.subtitle = ""
+        if (txtMessage.text.toString() == "") {
+            Toast.makeText(this, R.string.insert_message, Toast.LENGTH_SHORT).show()
+            return
+        }
+        isTyping = false
         val jsonObject = JSONObject()
+        val message = txtMessage.text.toString()
         jsonObject.put("user_one", userDBModel?.idUser)
-        jsonObject.put("message", txtMessage.text)
+        jsonObject.put("message", message)
         jsonObject.put("message_room", messageRoom)
         try {
             mSocketIO.emit("create-message-personal", jsonObject)
-        }
-        catch (exception: Exception){
+            txtMessage.text.clear()
+        } catch (exception: Exception) {
             Toast.makeText(this, R.string.error_get_room_personal, Toast.LENGTH_SHORT).show()
         }
 
@@ -215,20 +295,48 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun scrollToBottom(){
+    private fun scrollToBottom() {
         recyclerView.smoothScrollToPosition(chatAdapter.itemCount - 1)
     }
 
     private fun addMessage(createdBy: String, imgChat: String, message: String) {
         chatModel.add(ChatModel(createdBy, imgChat, message))
         chatAdapter.notifyItemInserted(chatModel.size - 1)
-
         scrollToBottom()
+    }
+
+    private fun removeTypingBar() {
+        supportActionBar?.subtitle = ""
+    }
+
+    private fun addTypingBar(textUser: String) {
+        supportActionBar?.subtitle = textUser
+    }
+
+    private fun removeTyping() {
+        val jsonObject = JSONObject()
+        val idUser = userDBModel?.idUser
+        jsonObject.put("message_room", messageRoom)
+        jsonObject.put("id", idUser)
+        mSocketIO.emit("stop_typing", jsonObject)
+    }
+
+    private fun addTyping() {
+        val jsonObject = JSONObject()
+        val nameUser = userDBModel?.firstName + " " + userDBModel?.surname
+        val idUser = userDBModel?.idUser
+        jsonObject.put("message_room", messageRoom)
+        jsonObject.put("user", nameUser)
+        jsonObject.put("id", idUser)
+        mSocketIO.emit("typing", jsonObject)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mSocketIO.disconnect()
+        mSocketIO.off("create-message-personal")
         mSocketIO.off("get-message-personal")
+        mSocketIO.off("typing")
     }
+
 }
